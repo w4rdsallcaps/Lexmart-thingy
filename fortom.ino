@@ -7,6 +7,8 @@ LiquidCrystal lcd(2, 3, 4, 5, 6, 8);
 
 #define PIN_RELAY_1 7  // Pin used to control the relay
 #define PIN_RELAY_2 9  // Pin used to detect the input current
+#define PIN_RESET_BUTTON 10 // Pin used for the reset button
+
 // Variable to store the loop count
 unsigned long loopCount = 0;
 
@@ -24,6 +26,9 @@ void setup() {
   // Initialize PIN_RELAY_2 as an input with internal pull-up resistor
   pinMode(PIN_RELAY_2, INPUT_PULLUP);
 
+  // Initialize the reset button pin as an input with internal pull-up resistor
+  pinMode(PIN_RESET_BUTTON, INPUT_PULLUP);
+
   // Start serial communication for debugging
   Serial.begin(9600);
 
@@ -37,8 +42,25 @@ void setup() {
 }
 
 void loop() {
-  // Check if PIN_RELAY_2 is LOW (button pressed)
-  if (digitalRead(PIN_RELAY_2) == LOW) {
+  // Check if the reset button is pressed
+  if (digitalRead(PIN_RESET_BUTTON) == LOW) {
+    // Reset the loop count
+    loopCount = 0;
+
+    // Save the reset loop count to EEPROM
+    EEPROM.write(0, loopCount & 0xFF);
+    EEPROM.write(1, (loopCount >> 8) & 0xFF);
+    EEPROM.write(2, (loopCount >> 16) & 0xFF);
+    EEPROM.write(3, (loopCount >> 24) & 0xFF);
+
+    // Update the display immediately after reset
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Loop Count:");
+    lcd.setCursor(0, 1);
+    lcd.print("Count: ");
+    lcd.print(loopCount);
+  } else if (digitalRead(PIN_RELAY_2) == LOW) {
     // Display the names when PIN_RELAY_2 is LOW
     lcd.clear();
     lcd.setCursor(0, 0);
