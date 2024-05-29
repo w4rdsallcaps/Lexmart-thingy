@@ -8,6 +8,7 @@ LiquidCrystal lcd(2, 3, 4, 5, 6, 8);
 #define PIN_RELAY_1 7  // Pin used to control the relay
 #define PIN_RELAY_2 9  // Pin used to detect the input current
 #define PIN_RESET_BUTTON 10 // Pin used for the reset button
+#define POT_PIN A0  // Pin used for the potentiometer
 
 // Variable to store the loop count
 unsigned long loopCount = 0;
@@ -42,6 +43,12 @@ void setup() {
 }
 
 void loop() {
+  // Read the potentiometer value
+  int potValue = analogRead(POT_PIN);
+
+  // Map the potentiometer value to a delay range (e.g., 100 to 2000 milliseconds)
+  int delayTime = map(potValue, 0, 1023, 100, 2000);
+
   // Check if the reset button is pressed
   if (digitalRead(PIN_RESET_BUTTON) == LOW) {
     // Reset the loop count
@@ -90,12 +97,12 @@ void loop() {
     // Turn on the relay
     Serial.println("Turn on the relay");
     digitalWrite(PIN_RELAY_1, HIGH);
-    delay(500);
+    delay(delayTime);  // Use the variable delay time
 
     // Turn off the relay
     Serial.println("Turn off the relay");
     digitalWrite(PIN_RELAY_1, LOW);
-    delay(500);
+    delay(delayTime);  // Use the variable delay time
 
     // Increment the loop count
     loopCount++;
