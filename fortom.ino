@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include <EEPROM.h> // Include the EEPROM library
 
 // Initialize the library with the numbers of the interface pins
 // RS -> 2, EN -> 3, D4 -> 4, D5 -> 5, D6 -> 6, D7 -> 8
@@ -25,6 +26,14 @@ void setup() {
 
   // Start serial communication for debugging
   Serial.begin(9600);
+
+  // Read the loop count from EEPROM
+  loopCount = EEPROM.read(0) | (EEPROM.read(1) << 8) | (EEPROM.read(2) << 16) | (EEPROM.read(3) << 24);
+
+  // Display the initial loop count on the LCD
+  lcd.setCursor(0, 1);
+  lcd.print("Count: ");
+  lcd.print(loopCount);
 }
 
 void loop() {
@@ -68,6 +77,12 @@ void loop() {
 
     // Increment the loop count
     loopCount++;
+
+    // Save the loop count to EEPROM
+    EEPROM.write(0, loopCount & 0xFF);
+    EEPROM.write(1, (loopCount >> 8) & 0xFF);
+    EEPROM.write(2, (loopCount >> 16) & 0xFF);
+    EEPROM.write(3, (loopCount >> 24) & 0xFF);
 
     // Clear the second line
     lcd.setCursor(0, 1);  // Set cursor to the first column of the second row
