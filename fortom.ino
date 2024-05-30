@@ -64,7 +64,7 @@ void loop() {
     // Display the names when PIN_RELAY_2 is LOW
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Powered by: ");
+    lcd.print("Powered by the Circuit Crusaders");
 
     // Prepare the message to scroll
     String names = "Kineth Noval, Jemuel Valencia, Ellaine Barro, Louie Valle, Miguel Hermoso";
