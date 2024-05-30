@@ -102,12 +102,12 @@ void loop() {
     // Turn on the relay
     Serial.println("pull");
     digitalWrite(PIN_RELAY_1, HIGH);
-    delay(500);
+    delay(1500);
 
     // Turn off the relay
     Serial.println("push");
     digitalWrite(PIN_RELAY_1, LOW);
-    delay(500);
+    delay(1500);
 
     // Increment the loop count
     loopCount++;
