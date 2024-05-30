@@ -13,7 +13,7 @@ LiquidCrystal lcd(10, 3, 4, 5, 6, 8);
 unsigned long loopCount = 0;
 volatile bool reset = false;
 
-//Variable to store LCD contrast value
+// Variable to store LCD contrast value
 int contrast = 60;
 
 void setup() {
@@ -32,14 +32,14 @@ void setup() {
   // Read the loop count from EEPROM
   loopCount = EEPROM.read(0) | (EEPROM.read(1) << 8) | (EEPROM.read(2) << 16) | (EEPROM.read(3) << 24);
 
-  // Set up reset button interupt
+  // Set up reset button interrupt
   attachInterrupt(digitalPinToInterrupt(PIN_RESET_BUTTON), resetCount, FALLING);
 
   // Set up the LCD's number of columns and rows
   analogWrite(11, contrast);
   lcd.begin(16, 2);
 
-  // Print a message to the LCD
+  // Print the initial message to the LCD
   lcd.setCursor(0, 0);  // Set cursor to the first column of the first row
   lcd.print("Loop Count:");  // Print the initial message
 
@@ -61,28 +61,31 @@ void loop() {
     EEPROM.write(3, (loopCount >> 24) & 0xFF);
 
     // Update the display immediately after reset
-    lcd.clear();
+     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Loop Count:");
     lcd.setCursor(0, 1);
     lcd.print(loopCount);
     reset = false;
   } else if (digitalRead(PIN_RELAY_2) == LOW) {
-    // Display the names when PIN_RELAY_2 is LOW
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Powered by the Circuit Crusaders");
-
-    // Prepare the message to scroll
+    // Prepare the scrolling messages
+    String topMessage = "Powered by the Circuit Crusader";
     String names = "Kineth Noval, Jemuel Valencia, Ellaine Barro, Louie Valle, Miguel Hermoso";
-    int namesLength = names.length();
+    String paddedTopMessage = topMessage + "                "; // 16 spaces for padding
     String paddedNames = names + "                "; // 16 spaces for padding
 
+    int topMessageLength = paddedTopMessage.length();
+    int namesLength = paddedNames.length();
+    int maxLength = max(topMessageLength, namesLength);
+
     // Scroll the names on the second line
-    for (int position = 0; position < namesLength + 16; position++) {
+    for (int position = 0; position < maxLength; position++) {
+      lcd.setCursor(0, 0);
+      lcd.print(paddedTopMessage.substring(position, position + 16));
       lcd.setCursor(0, 1);
       lcd.print(paddedNames.substring(position, position + 16));
       delay(150);
+
       if (digitalRead(PIN_RELAY_2) == HIGH) {
         break; // Exit the loop if the switch is released
       }
@@ -92,17 +95,19 @@ void loop() {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Loop Count:");
+    lcd.setCursor(0, 1);
+    lcd.print(loopCount);
   } else {
-    // Resume the relay operation and stop displaying the names
+    // Resume the relay operation and stop displaying the scrolling names
     // Turn on the relay
-    Serial.println("Turn on the relay");
+    Serial.println("pull");
     digitalWrite(PIN_RELAY_1, HIGH);
-    delay(1500);
+    delay(500);
 
     // Turn off the relay
-    Serial.println("Turn off the relay");
+    Serial.println("push");
     digitalWrite(PIN_RELAY_1, LOW);
-    delay(1500);
+    delay(500);
 
     // Increment the loop count
     loopCount++;
