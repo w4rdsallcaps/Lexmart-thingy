@@ -3,26 +3,22 @@
 
 // Initialize the library with the numbers of the interface pins
 // RS -> 2, EN -> 3, D4 -> 4, D5 -> 5, D6 -> 6, D7 -> 8
-LiquidCrystal lcd(2, 3, 4, 5, 6, 8);
+LiquidCrystal lcd(10, 3, 4, 5, 6, 8);
 
 #define PIN_RELAY_1 7  // Pin used to control the relay
 #define PIN_RELAY_2 9  // Pin used to detect the input current
-#define PIN_RESET_BUTTON 10 // Pin used for the reset button
+#define PIN_RESET_BUTTON 2 // Pin used for the reset button
 
 // Variable to store the loop count
 unsigned long loopCount = 0;
+volatile bool reset = false;
 
 //Variable to store LCD contrast value
 int contrast = 60;
 
 void setup() {
-  // Set up the LCD's number of columns and rows
-  analogWrite(11, contrast);
-  lcd.begin(16, 2);
-
-  // Print a message to the LCD
-  lcd.setCursor(0, 0);  // Set cursor to the first column of the first row
-  lcd.print("Loop Count:");  // Print the initial message
+  // Start serial communication for debugging
+  Serial.begin(9600);
 
   // Initialize the relay pin as an output
   pinMode(PIN_RELAY_1, OUTPUT);
@@ -33,11 +29,19 @@ void setup() {
   // Initialize the reset button pin as an input with internal pull-up resistor
   pinMode(PIN_RESET_BUTTON, INPUT_PULLUP);
 
-  // Start serial communication for debugging
-  Serial.begin(9600);
-
   // Read the loop count from EEPROM
   loopCount = EEPROM.read(0) | (EEPROM.read(1) << 8) | (EEPROM.read(2) << 16) | (EEPROM.read(3) << 24);
+
+  // Set up reset button interupt
+  attachInterrupt(digitalPinToInterrupt(PIN_RESET_BUTTON), resetCount, FALLING);
+
+  // Set up the LCD's number of columns and rows
+  analogWrite(11, contrast);
+  lcd.begin(16, 2);
+
+  // Print a message to the LCD
+  lcd.setCursor(0, 0);  // Set cursor to the first column of the first row
+  lcd.print("Loop Count:");  // Print the initial message
 
   // Display the initial loop count on the LCD
   lcd.setCursor(0, 1);
@@ -46,7 +50,7 @@ void setup() {
 
 void loop() {
   // Check if the reset button is pressed
-  if (digitalRead(PIN_RESET_BUTTON) == LOW) {
+  if (reset) {
     // Reset the loop count
     loopCount = 0;
 
@@ -62,6 +66,7 @@ void loop() {
     lcd.print("Loop Count:");
     lcd.setCursor(0, 1);
     lcd.print(loopCount);
+    reset = false;
   } else if (digitalRead(PIN_RELAY_2) == LOW) {
     // Display the names when PIN_RELAY_2 is LOW
     lcd.clear();
@@ -116,4 +121,8 @@ void loop() {
     lcd.setCursor(0, 1);
     lcd.print(loopCount);
   }
+}
+
+void resetCount() {
+  reset = true;
 }
