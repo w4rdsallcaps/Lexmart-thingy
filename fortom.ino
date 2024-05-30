@@ -12,8 +12,12 @@ LiquidCrystal lcd(2, 3, 4, 5, 6, 8);
 // Variable to store the loop count
 unsigned long loopCount = 0;
 
+//Variable to store LCD contrast value
+int contrast = 60;
+
 void setup() {
   // Set up the LCD's number of columns and rows
+  analogWrite(11, contrast);
   lcd.begin(16, 2);
 
   // Print a message to the LCD
@@ -37,7 +41,6 @@ void setup() {
 
   // Display the initial loop count on the LCD
   lcd.setCursor(0, 1);
-  lcd.print("Count: ");
   lcd.print(loopCount);
 }
 
@@ -58,7 +61,6 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print("Loop Count:");
     lcd.setCursor(0, 1);
-    lcd.print("Count: ");
     lcd.print(loopCount);
   } else if (digitalRead(PIN_RELAY_2) == LOW) {
     // Display the names when PIN_RELAY_2 is LOW
@@ -112,7 +114,6 @@ void loop() {
 
     // Set the cursor to the second line again to print the updated count
     lcd.setCursor(0, 1);
-    lcd.print("Count: ");
     lcd.print(loopCount);
   }
 }
